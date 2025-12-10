@@ -4,9 +4,7 @@ import { cleanup, screen } from "@testing-library/react";
 import { describe, assert } from "vitest";
 import { add } from "lodash/fp";
 import { renderWithRouter } from "../../UITestingUtilities";
-import {
-  fastCheckCreateObjectWithNTestPlayers
-} from "../../../GameLogic/TestDataGenerators";
+import { fastCheckCreateObjectWithNTestPlayers } from "../../../GameLogic/TestDataGenerators";
 import { DEFAULTSQUADSIZE } from "../../../GameLogic/Constants";
 import { SquadTable } from "../SquadTable";
 
@@ -29,10 +27,8 @@ describe("SquadTable", async () => {
 
           renderWithRouter(<TestElement />);
 
-
-	  const actualPlayerRows = screen.getAllByRole("row")
-	  assert.lengthOf(actualPlayerRows, add(1, DEFAULTSQUADSIZE))
-	  
+          const actualPlayerRows = screen.getAllByRole("row");
+          assert.lengthOf(actualPlayerRows, add(1, DEFAULTSQUADSIZE));
         })
         .beforeEach(async () => {
           cleanup();

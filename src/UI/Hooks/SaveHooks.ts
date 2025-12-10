@@ -8,6 +8,7 @@ import {
   LeagueTableRow,
   DomesticLeague,
   MatchLog,
+  SimulationState
 } from "../../GameLogic/Types";
 import {
   getSaveOptionsOfAllSaves,
@@ -15,7 +16,10 @@ import {
   getUserLeagueFromSaveOptions,
   defaultOpenDB,
 } from "../../GameLogic/Save";
-import { createArrayOfLeagueTableRows, createPlayersObject } from "../../GameLogic/Transformers";
+import {
+  createArrayOfLeagueTableRows,
+  createPlayersObject,
+} from "../../GameLogic/Transformers";
 
 export const getAllSaveOptionsHook = (): Option<
   Array<[string, SaveOptions]>
@@ -47,11 +51,13 @@ export const getSaveEntitiesForMainScreen = (
 ): [
   IDBPDatabase,
   SaveOptions,
+  //SimulationState,
   Record<string, Player>,
   [Array<LeagueTableRow>, string],
 ] => {
   const [db, setDB] = useState<IDBPDatabase | null>(null);
   const [saveOptions, setSaveOptions] = useState<SaveOptions | null>(null);
+  //const [simulationState, setSimulationState] = useState<SimulationState | null>(null);
   const [players, setPlayers] = useState<Record<string, Player>>({});
   const [leagueTableRowsAndHeader, setLeagueTableRowsAndHeader] = useState<
     [Array<LeagueTableRow>, string]
@@ -64,7 +70,9 @@ export const getSaveEntitiesForMainScreen = (
       const db = await defaultOpenDB(saveNumber);
       if (!ignore) {
         const options = await db.get("SaveOptions", saveNumber);
+	//const state = await db.get("SimulationState", saveNumber);
         setSaveOptions(options);
+	//setSimulationState(state);
         setDB(db);
       }
     }
@@ -88,7 +96,8 @@ export const getSaveEntitiesForMainScreen = (
         setPlayers(createPlayersObject(clubPlayers));
 
         const domesticLeagueNumber = getUserLeagueFromSaveOptions(saveOptions);
-        const { CurrentSeason, Countries } = saveOptions;
+        const { Countries, CurrentSeason } = saveOptions;
+	//const { CurrentSeason } = simulationState;
         const domesticLeague: DomesticLeague = await await (
           db as IDBPDatabase
         ).get("DomesticLeagues", domesticLeagueNumber);
@@ -116,7 +125,44 @@ export const getSaveEntitiesForMainScreen = (
   return [
     db as IDBPDatabase,
     saveOptions as SaveOptions,
+    //simulationState as SimulationState,
     players,
     leagueTableRowsAndHeader,
   ];
 };
+
+
+
+
+function makeRangeIterator(start = 0, end = Infinity, step = 1) {
+  let nextIndex = start;
+  let iterationCount = 0;
+
+  const rangeIterator = {
+    next() {
+      let result;
+      if (nextIndex < end) {
+        result = { value: nextIndex, done: false };
+        nextIndex += step;
+        iterationCount++;
+        return result;
+      }
+      return { value: iterationCount, done: true };
+    },
+  };
+  return rangeIterator;
+}
+
+export const simForwardHook = (isSimming) => {
+  useEffect(() => {    
+    if (isSimming) {
+      const iter = makeRangeIterator(1,10,1);
+      let result = iter.next();
+      while (!result.done) {
+	console.log(result.value); // 1 3 5 7 9
+	result = iter.next();
+      }
+      
+    }
+  }, [isSimming])
+}

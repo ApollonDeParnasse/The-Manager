@@ -1,9 +1,11 @@
 import React from "react";
-import { describe, expect } from "vitest";
+import { describe, expect, vi } from "vitest";
 import { renderHook, cleanup, waitFor } from "@testing-library/react";
 import "fake-indexeddb/auto";
 import { deleteDB } from "idb";
 import { fc, test } from "@fast-check/vitest";
+import { toNullable } from "fp-ts/Option";
+import { SaveOptions } from "../../../GameLogic/Types";
 import {
   fastCheckCreateTestSaveArguments,
   fastCheckRandomItemFromArray,
@@ -16,8 +18,10 @@ import {
   assertIsLeagueTableRow,
 } from "../../../GameLogic/Asserters";
 import {
-  getSaveEntitiesForMainScreen,
   getAllSaveOptionsHook,
+  getSaveEntitiesForMainScreen,
+  simForwardHook,
+  SIMFORWARDTYPES,
 } from "../SaveHooks";
 
 describe("SaveHooks", async () => {
@@ -34,8 +38,12 @@ describe("SaveHooks", async () => {
 
           rerender();
 
-          const { current: actualResult } = result;
-          
+          const { current } = result;
+
+          const actualResult = toNullable(current) as Array<
+            [string, SaveOptions]
+          >;
+
           expect(actualResult.length).toBe(1);
 
           testSave.close();
@@ -100,5 +108,99 @@ describe("SaveHooks", async () => {
         .afterEach(cleanup),
       { numRuns: 1 },
     );
+  });
+
+  describe("simForwardHook", async () => {
+    test("start simForward", async () => {
+      await fc.assert(
+        fc
+          .asyncProperty(
+            fc.gen(),
+            fc.constantFrom(...SIMFORWARDTYPES),
+            async (fcGen, testSimForwardType) => {
+              const testSaveOptions =
+                fastCheckCreateTestSaveOptionsWithRandomCountries(fcGen);
+
+              const testSave = await createSave(testSaveOptions);
+
+              const testSetIsSimming = vi.fn();
+
+              const testSimForwardHook = simForwardHook(testSimForwardType);
+
+              const { result, rerender, unmount } = renderHook(
+                ({ saveNumber, isSimming, setIsSimming }) => {
+                  return testSimForwardHook(
+                    saveNumber,
+                    isSimming,
+                    setIsSimming,
+                  );
+                },
+                {
+                  initialProps: {
+                    saveNumber: testSave.name,
+                    isSimming: true,
+                    setIsSimming: testSetIsSimming,
+                  },
+                },
+              );
+
+              expect(testSetIsSimming).toHaveBeenCalledTimes(1);
+
+              testSave.close();
+              await deleteDB(testSave.name);
+
+              unmount();
+            },
+          )
+          .afterEach(cleanup),
+        { numRuns: 1 },
+      );
+    });
+
+    test("stop simForward", async () => {
+      await fc.assert(
+        fc
+          .asyncProperty(
+            fc.gen(),
+            fc.constantFrom(...SIMFORWARDTYPES),
+            async (fcGen, testSimForwardType) => {
+              const testSaveOptions =
+                fastCheckCreateTestSaveOptionsWithRandomCountries(fcGen);
+
+              const testSave = await createSave(testSaveOptions);
+
+              const testSetIsSimming = vi.fn();
+
+              const testSimForwardHook = simForwardHook(testSimForwardType);
+
+              const { result, rerender, unmount } = renderHook(
+                ({ saveNumber, isSimming, setIsSimming }) => {
+                  return testSimForwardHook(
+                    saveNumber,
+                    isSimming,
+                    setIsSimming,
+                  );
+                },
+                {
+                  initialProps: {
+                    saveNumber: testSave.name,
+                    isSimming: true,
+                    setIsSimming: testSetIsSimming,
+                  },
+                },
+              );
+
+              expect(testSetIsSimming).toHaveBeenCalledTimes(1);
+
+              testSave.close();
+              await deleteDB(testSave.name);
+
+              unmount();
+            },
+          )
+          .afterEach(cleanup),
+        { numRuns: 1 },
+      );
+    });
   });
 });

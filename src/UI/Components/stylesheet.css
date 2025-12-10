@@ -24,6 +24,6 @@
 tr {
   cursor: pointer;
 }
-tr[id="11"]{
+tr[id="11"] {
   border-bottom: thick solid;
 }

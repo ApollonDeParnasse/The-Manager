@@ -1389,9 +1389,12 @@ export const createSavePlayers = pipe([
 ]);
 
 export const createPlayersObject = pipe([
-  map((player: Player): [number, Player] => [property("PlayerNumber", player), player]),
-  Object.fromEntries
-])
+  map((player: Player): [number, Player] => [
+    property("PlayerNumber", player),
+    player,
+  ]),
+  Object.fromEntries,
+]);
 
 export const generateClubFirstSeasonPlayersWithTransform = curry(
   <T>(transformer: (playerNumber: number) => T, clubNumber: number): T => {
@@ -1603,3 +1606,15 @@ export const indexesCreator = pipe([
   filter(pipe([size, lt(0)])),
   map(<T>(x: Array<T>): T | Array<T> => (x.length == 1 ? (first(x) as T) : x)),
 ]);
+
+enum SimType {
+  SIMUNTILNEXTMATCH=1,
+  SIMONEWEEK=2,
+  SIMONEMONTH=4,
+  SIMUNTILENDOFTHESEASON=38,
+}
+
+export const [simUntilNextMatchHook,
+  simOneWeekHook,
+  simOneMonthHook,
+  simUntilEndOfTheSeasonHook] = unfold(() => () => {},4)

@@ -10,30 +10,38 @@ import { convertClubAbsoluteNumberIntoClubName } from "../../GameLogic/Transform
 export interface ClubStatusProps {
   baseCountries: BaseCountries;
   clubDetails: [number, string];
-  clubFinances: Array<number>
+  clubFinances: Array<number>;
 }
-const BASICCLUBFINANCES: Array<[string, number]> = mapIndexed((name: string, index: number): [string, number] => [name, index], [
-  "Average Attendance",
-  "Revenue",
-  "Profit",
-  "Cash"
-])
+const BASICCLUBFINANCES: Array<[string, number]> = mapIndexed(
+  (name: string, index: number): [string, number] => [name, index],
+  ["Average Attendance", "Revenue", "Profit", "Cash"],
+);
 
-const ClubStatus = (clubFinancesCategories: Array<[string, number]>) => ({baseCountries, clubDetails, clubFinances}: ClubStatusProps) => {
-  const [clubNumber, clubRecord] = clubDetails
-  const valueCreator =  ([valueName, key]: [string, number], value: number) => <p key={key}>{valueName}: {value}</p>
-  const clubName: string = convertClubAbsoluteNumberIntoClubName(baseCountries, clubNumber)
-  return (
-    <Col md={{offset: 4}}>
-      <Row>
-	<h2>{clubName}</h2>
-	<h3>{clubRecord}</h3>
-      </Row>
-      <Row>
-	{zipWith(valueCreator, clubFinancesCategories, clubFinances)}
-      </Row>
-    </Col>    
-  );
-};
+const ClubStatus =
+  (clubFinancesCategories: Array<[string, number]>) =>
+  ({ baseCountries, clubDetails, clubFinances }: ClubStatusProps) => {
+    const [clubNumber, clubRecord] = clubDetails;
+    const valueCreator = (
+      [valueName, key]: [string, number],
+      value: number,
+    ) => (
+      <p key={key}>
+        {valueName}: {value}
+      </p>
+    );
+    const clubName: string = convertClubAbsoluteNumberIntoClubName(
+      baseCountries,
+      clubNumber,
+    );
+    return (
+      <Col md={{ offset: 4 }}>
+        <Row>
+          <h2>{clubName}</h2>
+          <h3>{clubRecord}</h3>
+        </Row>
+        <Row>{zipWith(valueCreator, clubFinancesCategories, clubFinances)}</Row>
+      </Col>
+    );
+  };
 
-export const BasicClubStatus = ClubStatus(BASICCLUBFINANCES)
+export const BasicClubStatus = ClubStatus(BASICCLUBFINANCES);

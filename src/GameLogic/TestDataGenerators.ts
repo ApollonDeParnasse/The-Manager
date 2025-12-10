@@ -497,9 +497,12 @@ export const fastCheckCreateNTestPlayers = unfoldListOfTestEntities([
 
 export const fastCheckCreateObjectWithNTestPlayers = pipe([
   fastCheckCreateNTestPlayers,
-  map((player: Player): [number, Player] => [property("PlayerNumber", player),player]),
-  Object.fromEntries
-])
+  map((player: Player): [number, Player] => [
+    property("PlayerNumber", player),
+    player,
+  ]),
+  Object.fromEntries,
+]);
 
 export const fastCheckCreateNTestClubs = unfoldListOfTestEntities([
   fastCheckRandomClubNumberGenerator,

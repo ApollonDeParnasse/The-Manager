@@ -58,7 +58,7 @@ const LeagueTable =
     leagueTableRowsAndHeader: [Array<LeagueTableRow>, string];
   }) => {
     const [leagueTableRows, header] = leagueTableRowsAndHeader;
-    
+
     return (
       <div>
         <header>

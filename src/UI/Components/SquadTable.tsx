@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { property } from "lodash/fp";
 import { Player } from "../../GameLogic/Types";
 import {
@@ -8,7 +8,7 @@ import {
   getPlayerPositionGroupName,
 } from "../../GameLogic/Getters";
 import TableWithDraggableRows from "./TableWithDraggableRows";
-import "./stylesheet.css"
+import "./stylesheet.css";
 
 export const SQUADTABLEHEADERSGETTERSMAPPING: Record<
   string,
@@ -29,24 +29,27 @@ export const SQUADTABLEHEADERS: Array<string> = Object.keys(
   SQUADTABLEHEADERSGETTERSMAPPING,
 );
 
+export const SquadTable = ({
+  players,
+}: {
+  players: Record<string, Player>;
+}) => {
+  const [itemIDs, setItemIDs] = useState(Object.keys(players));
 
-export const SquadTable = ({ players }: { players: Record<string, Player> }) => {
-
-  const [itemIDs, setItemIDs] = useState(Object.keys(players))
-  
   return (
     <div>
       <div aria-describedby="squad-table" id="squad">
-	<h2>Squad</h2>
-      <TableWithDraggableRows
-	cellValueGetter={getPlayerCellValue}
-	columnHeaders={SQUADTABLEHEADERS}
-	rowsObject={players}
-	itemIDs={itemIDs}
-	setItemIDs={setItemIDs}/>
-      </div>      
+        <h2>Squad</h2>
+        <TableWithDraggableRows
+          cellValueGetter={getPlayerCellValue}
+          columnHeaders={SQUADTABLEHEADERS}
+          rowsObject={players}
+          itemIDs={itemIDs}
+          setItemIDs={setItemIDs}
+        />
+      </div>
       <div role="tooltip" id="squad-table">
-	<p>The first 11 players in this table will play in your next match</p>	
+        <p>The first 11 players in this table will play in your next match</p>
       </div>
     </div>
   );

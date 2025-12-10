@@ -101,8 +101,7 @@ export interface SaveOptions {
   DomesticLeagueIndex: number;
   ClubIndex: number;
   Countries: BaseCountries;
-  StartSeason: number;
-  CurrentSeason: number;
+  StartSeason: number;  
 }
 
 export interface SaveArguments {
@@ -110,6 +109,14 @@ export interface SaveArguments {
   DomesticLeagues: Array<DomesticLeague>;
   Clubs: Array<Club>;
   Players: Array<Player>;
+}
+
+export interface SimulationState {
+  DomesticLeagues: Array<DomesticLeague>;
+  Clubs: Array<Club>;
+  CurrentDay: number;
+  CurrentWeek: number;
+  CurrentSeason: number;
 }
 
 export interface SaveSchema extends DBSchema {

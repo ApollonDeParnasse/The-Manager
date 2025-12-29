@@ -1,14 +1,14 @@
 import { IDBPDatabase } from "idb";
 import { useState, useEffect } from "react";
 import { ReadonlyNonEmptyArray } from "fp-ts/ReadonlyNonEmptyArray";
-import { Option, none as optionNone } from "fp-ts/Option";
+import { Option, none as optionNone, some as optionSome } from "fp-ts/Option";
 import {
   SaveOptions,
   Player,
   LeagueTableRow,
   DomesticLeague,
   MatchLog,
-  SimulationState
+  SimulationState,
 } from "../../GameLogic/Types";
 import {
   getSaveOptionsOfAllSaves,
@@ -48,17 +48,18 @@ export const getAllSaveOptionsHook = (): Option<
 
 export const getSaveEntitiesForMainScreen = (
   saveNumber: string,
+  matchesLeftToSim: number
 ): [
   IDBPDatabase,
   SaveOptions,
-  //SimulationState,
+  SimulationState,
   Record<string, Player>,
   [Array<LeagueTableRow>, string],
 ] => {
   const [db, setDB] = useState<IDBPDatabase | null>(null);
   const [saveOptions, setSaveOptions] = useState<SaveOptions | null>(null);
-  //const [simulationState, setSimulationState] = useState<SimulationState | null>(null);
   const [players, setPlayers] = useState<Record<string, Player>>({});
+  const [simulationState, setSimulationState] = useState<SimulationState|null>(null);
   const [leagueTableRowsAndHeader, setLeagueTableRowsAndHeader] = useState<
     [Array<LeagueTableRow>, string]
   >([[], ""]);
@@ -70,9 +71,7 @@ export const getSaveEntitiesForMainScreen = (
       const db = await defaultOpenDB(saveNumber);
       if (!ignore) {
         const options = await db.get("SaveOptions", saveNumber);
-	//const state = await db.get("SimulationState", saveNumber);
         setSaveOptions(options);
-	//setSimulationState(state);
         setDB(db);
       }
     }
@@ -97,7 +96,6 @@ export const getSaveEntitiesForMainScreen = (
 
         const domesticLeagueNumber = getUserLeagueFromSaveOptions(saveOptions);
         const { Countries, CurrentSeason } = saveOptions;
-	//const { CurrentSeason } = simulationState;
         const domesticLeague: DomesticLeague = await await (
           db as IDBPDatabase
         ).get("DomesticLeagues", domesticLeagueNumber);
@@ -112,6 +110,16 @@ export const getSaveEntitiesForMainScreen = (
         const rowsAndHeader: [Array<LeagueTableRow>, string] =
           createArrayOfLeagueTableRows(Countries, domesticLeague, matchLogs);
         setLeagueTableRowsAndHeader(rowsAndHeader);
+
+	const newSimulationState: SimulationState = {
+	  CurrentClubNumber: clubNumber,
+	  CurrentClubRecord: "0-0-0",
+	  CurrentDay: Math.random(),
+	  CurrentWeek: 0,
+	  CurrentSeason,
+	}
+	
+	setSimulationState(newSimulationState)
       }
     }
 
@@ -120,49 +128,44 @@ export const getSaveEntitiesForMainScreen = (
     return () => {
       ignore = true;
     };
-  }, [db, saveOptions]);
+  }, [db, saveOptions, matchesLeftToSim]);
 
   return [
     db as IDBPDatabase,
     saveOptions as SaveOptions,
-    //simulationState as SimulationState,
+    simulationState as SimulationState,
     players,
     leagueTableRowsAndHeader,
   ];
 };
 
-
-
-
-function makeRangeIterator(start = 0, end = Infinity, step = 1) {
-  let nextIndex = start;
-  let iterationCount = 0;
-
-  const rangeIterator = {
-    next() {
-      let result;
-      if (nextIndex < end) {
-        result = { value: nextIndex, done: false };
-        nextIndex += step;
-        iterationCount++;
-        return result;
-      }
-      return { value: iterationCount, done: true };
-    },
+const runSimForwardWorker = (
+  myWorker: Worker,
+  decrementMatchsLeftToSim: () => void,
+) => {
+  myWorker.postMessage([1, 2]);
+  console.log("Started simForwardWorker");
+  myWorker.onmessage = (event) => {
+    decrementMatchsLeftToSim()
   };
-  return rangeIterator;
-}
+};
 
-export const simForwardHook = (isSimming) => {
-  useEffect(() => {    
-    if (isSimming) {
-      const iter = makeRangeIterator(1,10,1);
-      let result = iter.next();
-      while (!result.done) {
-	console.log(result.value); // 1 3 5 7 9
-	result = iter.next();
-      }
-      
+
+export const simForwardHook = (
+  matchesLeftToSim: number,
+  decrementMatchsLeftToSim: () => void,
+) => {
+  useEffect(() => {
+    let ignore = false;
+    let myWorker: Worker;
+    if (!ignore && !!window.Worker && matchesLeftToSim > 0) {
+      console.log(matchesLeftToSim)
+      myWorker = new Worker(new URL("../Workers/simForwardWorker.js", import.meta.url))  
+      runSimForwardWorker(myWorker, decrementMatchsLeftToSim);
     }
-  }, [isSimming])
-}
+    return () => {
+      ignore = true;
+      myWorker && myWorker.terminate();
+    };
+  }, [matchesLeftToSim]);
+};

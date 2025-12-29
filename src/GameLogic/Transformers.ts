@@ -1608,13 +1608,15 @@ export const indexesCreator = pipe([
 ]);
 
 enum SimType {
-  SIMUNTILNEXTMATCH=1,
-  SIMONEWEEK=2,
-  SIMONEMONTH=4,
-  SIMUNTILENDOFTHESEASON=38,
+  SIMUNTILNEXTMATCH = 1,
+  SIMONEWEEK = 2,
+  SIMONEMONTH = 4,
+  SIMUNTILENDOFTHESEASON = 38,
 }
 
-export const [simUntilNextMatchHook,
+export const [
+  simUntilNextMatchHook,
   simOneWeekHook,
   simOneMonthHook,
-  simUntilEndOfTheSeasonHook] = unfold(() => () => {},4)
+  simUntilEndOfTheSeasonHook,
+] = unfold(() => () => {}, 4);

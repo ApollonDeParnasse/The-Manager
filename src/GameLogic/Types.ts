@@ -101,7 +101,7 @@ export interface SaveOptions {
   DomesticLeagueIndex: number;
   ClubIndex: number;
   Countries: BaseCountries;
-  StartSeason: number;  
+  StartSeason: number;
 }
 
 export interface SaveArguments {
@@ -112,8 +112,8 @@ export interface SaveArguments {
 }
 
 export interface SimulationState {
-  DomesticLeagues: Array<DomesticLeague>;
-  Clubs: Array<Club>;
+  CurrentClubNumber: number;
+  CurrentClubRecord: string;
   CurrentDay: number;
   CurrentWeek: number;
   CurrentSeason: number;

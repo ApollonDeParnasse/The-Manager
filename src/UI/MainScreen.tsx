@@ -3,6 +3,7 @@ import { useParams } from "react-router";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import { SimulationState } from "../GameLogic/Types"
 import { getSaveEntitiesForMainScreen } from "./Hooks/SaveHooks";
 import NavBar from "./Components/NavBar";
 import { BasicClubStatus } from "./Components/ClubStatus";
@@ -11,22 +12,38 @@ import { PartialLeagueTable } from "./Components/LeagueTable";
 
 export const MainScreen = () => {
   const params = useParams();
-  const [isSimming, setIsSimming] = useState(false);
+  const [matchesLeftToSim, setMatchsLeftToSim] = useState<number>(0);
+  
+  const createOnSim = (simulationState: SimulationState) => (simulationOption: number) => (): void => {
+    // simulationOption will be given to a function who will calculate the actual matches
+    console.log(`Will sim ${simulationOption} weeks`)
+    setMatchsLeftToSim(simulationOption);
+  };
+  
+  const decrementMatchsLeftToSim = (): void => {
+    setMatchsLeftToSim((x: number) => x - 1);
+  }; 
+  const stopSim = (): void => {
+    setMatchsLeftToSim(0);
+  };
+
   const { saveNumber } = params;
-  const [db, saveOptions, players, leagueTableRowsAndHeader] =
-    getSaveEntitiesForMainScreen(saveNumber as string);
-  const clubNumber = 0;
-  const clubRecord = "0-0-0";
-  const basicClubDetails: [number, string] = [clubNumber, clubRecord];
+  const [db, saveOptions, simulationState, players, leagueTableRowsAndHeader] =
+	getSaveEntitiesForMainScreen(saveNumber as string, matchesLeftToSim);
+    
   const basicClubFinances = [0, 0, 0, 0];
 
+  console.log(simulationState && simulationState.CurrentDay)
+  
 
   return (
     <div>
       <NavBar
         saveNumber={saveNumber as string}
-	isSimming={isSimming}
-        onSim={() => setIsSimming((value) => !value)}
+        matchesLeftToSim={matchesLeftToSim}
+        createOnSim={createOnSim(simulationState)}
+        stopSim={stopSim}
+        decrementMatchsLeftToSim={decrementMatchsLeftToSim}
       />
       <Container>
         <Row>
@@ -37,11 +54,11 @@ export const MainScreen = () => {
               />
             )) || <div>Loading..</div>}
           </Col>
-          {(saveOptions && (
+          {(saveOptions && simulationState && (
             <BasicClubStatus
               baseCountries={saveOptions.Countries}
-              clubDetails={basicClubDetails}
-              clubFinances={basicClubFinances}
+              simulationState={simulationState}
+	      clubFinances={basicClubFinances}
             />
           )) || <div>Loading..</div>}
           <Col>

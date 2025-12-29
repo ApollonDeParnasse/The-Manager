@@ -4,85 +4,85 @@ import { expect, describe, vi } from "vitest";
 import { fc, test } from "@fast-check/vitest";
 import { fastCheckRandomItemFromArray } from "../../../GameLogic/TestDataGenerators";
 import { setup } from "../../UITestingUtilities";
-import SimulationDropdownMenu, {SIMULATIONOPTIONS} from "../SimulationDropdownMenu";
+import SimulationDropdownMenu, {
+  SIMULATIONOPTIONS,
+} from "../SimulationDropdownMenu";
 
 describe("SimulationDropdownMenu tests", async () => {
-    test("isSimming=false", async () => {
-      await fc.assert(
-        fc
-          .asyncProperty(
-            fc.gen(),
-            fc.integer(),
-            async (fcGen, testSaveNumber) => {
-              const testSetIsSimming = vi.fn();
+  test("isSimming=false", async () => {
+    await fc.assert(
+      fc
+        .asyncProperty(
+          fc.gen(),
+          fc.integer(),
+          async (fcGen, testSaveNumber) => {
+            const testSetIsSimming = vi.fn();
 
-              const TestElement = () => {
-                return (
-                  <div>
-                    <SimulationDropdownMenu
-                      saveNumber={testSaveNumber.toString()}
-                      isSimming={false}
-		      onSim={testSetIsSimming}
-                    />
-                  </div>
-                );
-              };
-
-              setup(<TestElement />);
-
-              fireEvent.click(screen.getByText("Sim"));
-
-              const [testSimulationButtonText] = fastCheckRandomItemFromArray(
-                fcGen,
-                SIMULATIONOPTIONS,
+            const TestElement = () => {
+              return (
+                <div>
+                  <SimulationDropdownMenu
+                    saveNumber={testSaveNumber.toString()}
+                    isSimming={false}
+                    onSim={testSetIsSimming}
+                  />
+                </div>
               );
+            };
 
-              fireEvent.click(screen.getByText(testSimulationButtonText));	      
+            setup(<TestElement />);
 
-              expect(testSetIsSimming).toHaveBeenCalledTimes(1);
-            },
-          )
+            fireEvent.click(screen.getByText("Sim"));
 
-          .beforeEach(async () => {
-            cleanup();
-          }),
-      );
-    });
-    test("isSimming=true", async () => {
-      await fc.assert(
-        fc
-          .asyncProperty(
-            fc.gen(),
-            fc.integer(),
-            async (fcGen, testSaveNumber) => {
-              const testSetIsSimming = vi.fn();
+            const [testSimulationButtonText] = fastCheckRandomItemFromArray(
+              fcGen,
+              SIMULATIONOPTIONS,
+            );
 
-              const TestElement = () => {
-                return (
-                  <div>
-                    <SimulationDropdownMenu
-                      saveNumber={testSaveNumber.toString()}
-                      isSimming={true}
-                      onSim={testSetIsSimming}
-                    />
-                  </div>
-                );
-              };
+            fireEvent.click(screen.getByText(testSimulationButtonText));
 
-              setup(<TestElement />);
+            expect(testSetIsSimming).toHaveBeenCalledTimes(1);
+          },
+        )
 
-              fireEvent.click(screen.getByText("Stop"));
-	      fireEvent.click(screen.getByText("Stop Simulation"));
+        .beforeEach(async () => {
+          cleanup();
+        }),
+    );
+  });
+  test("isSimming=true", async () => {
+    await fc.assert(
+      fc
+        .asyncProperty(
+          fc.gen(),
+          fc.integer(),
+          async (fcGen, testSaveNumber) => {
+            const testSetIsSimming = vi.fn();
 
-              expect(testSetIsSimming).toHaveBeenCalledTimes(1);
-	      
-            },
-          )
+            const TestElement = () => {
+              return (
+                <div>
+                  <SimulationDropdownMenu
+                    saveNumber={testSaveNumber.toString()}
+                    isSimming={true}
+                    onSim={testSetIsSimming}
+                  />
+                </div>
+              );
+            };
 
-          .beforeEach(async () => {
-            cleanup();
-          }),
-      );
-    });
+            setup(<TestElement />);
+
+            fireEvent.click(screen.getByText("Stop"));
+            fireEvent.click(screen.getByText("Stop Simulation"));
+
+            expect(testSetIsSimming).toHaveBeenCalledTimes(1);
+          },
+        )
+
+        .beforeEach(async () => {
+          cleanup();
+        }),
+    );
+  });
 });
-

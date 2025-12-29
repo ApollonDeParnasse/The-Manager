@@ -6,40 +6,34 @@ import { setup } from "../../UITestingUtilities";
 import NavBar from "../NavBar";
 
 describe("NavBar", async () => {
-    test("Check buttons", async () => {
-      await fc.assert(
-        fc
-          .asyncProperty(
-            fc.integer(),
-            async (testSaveNumber) => {
-              const testOnSim = vi.fn();
+  test("Check buttons", async () => {
+    await fc.assert(
+      fc
+        .asyncProperty(fc.integer(), async (testSaveNumber) => {
+          const testOnSim = vi.fn();
 
-              const TestElement = () => {
-                return (
-                  <div>
-                    <NavBar
-                      saveNumber={testSaveNumber.toString()}
-                      isSimming={false}
-		      onSim={testOnSim}
-                    />
-                  </div>
-                );
-              };
+          const TestElement = () => {
+            return (
+              <div>
+                <NavBar
+                  saveNumber={testSaveNumber.toString()}
+                  isSimming={false}
+                  onSim={testOnSim}
+                />
+              </div>
+            );
+          };
 
-              setup(<TestElement />);
+          setup(<TestElement />);
 
-	      expect(screen.getByText("The Manager")).toBeTruthy();
-              expect(screen.getByText("Sim")).toBeTruthy();	      
-	      expect(screen.getByText("LeagueTable")).toBeTruthy();
-	      
+          expect(screen.getByText("The Manager")).toBeTruthy();
+          expect(screen.getByText("Sim")).toBeTruthy();
+          expect(screen.getByText("LeagueTable")).toBeTruthy();
+        })
 
-            },
-          )
-
-          .beforeEach(async () => {
-            cleanup();
-          }),
-      );
-    });
-})
-
+        .beforeEach(async () => {
+          cleanup();
+        }),
+    );
+  });
+});
